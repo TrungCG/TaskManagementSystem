@@ -2,15 +2,15 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings # Best practice: Dùng settings.AUTH_USER_MODEL
 
-# MODEL USER
+# MODEL USER (người dùng)
 class User(AbstractUser):
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name="Ảnh đại diện")
-    bio = models.TextField(null=True, blank=True, verbose_name="Giới thiệu")
+    # avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name="Ảnh đại diện")
+    # bio = models.TextField(null=True, blank=True, verbose_name="Giới thiệu")
     
     def __str__(self):
         return self.username
 
-# MODEL PROJECT
+# MODEL PROJECT (dự án)
 class Project(models.Model):
     name = models.CharField(max_length=255, verbose_name="Tên dự án")
     description = models.TextField(blank=True, null=True, verbose_name="Mô tả dự án")
@@ -22,7 +22,7 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
-# MODEL TASK
+# MODEL TASK (công việc)
 class Task(models.Model):
     class Status(models.TextChoices):
         TODO = 'TODO', 'To Do'
@@ -47,7 +47,7 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-# MODEL COMMENT
+# MODEL COMMENT (các bình luận)
 class Comment(models.Model):
     task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE, verbose_name="Công việc")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='comments', on_delete=models.CASCADE, verbose_name="Tác giả")
@@ -58,7 +58,7 @@ class Comment(models.Model):
     def __str__(self):
         return f'Comment by {self.author.username} on {self.task.title}'
 
-# MODEL ATTACHMENT
+# MODEL ATTACHMENT (các tập tin đính kèm)
 class Attachment(models.Model):
     task = models.ForeignKey(Task, related_name='attachments', on_delete=models.CASCADE, verbose_name="Công việc")
     file = models.FileField(upload_to='attachments/', verbose_name="Tập tin")
@@ -69,7 +69,7 @@ class Attachment(models.Model):
     def __str__(self):
         return f'Attachment for {self.task.title}'
 
-# MODEL ACTIVITYLOG
+# MODEL ACTIVITYLOG (nhật ký hoạt động)
 class ActivityLog(models.Model):
     action_description = models.CharField(max_length=255, verbose_name="Hành động")   
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='activity_logs', on_delete=models.SET_NULL, null=True, verbose_name="Người thực hiện")
