@@ -242,5 +242,53 @@ class CommentDetailView(APIView):
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+#  VIEW ATTACHMENT LIST/CREATE (danh sách/tạo tệp đính kèm)
+class AttachmentListView(APIView):   
+    # Get all attachments for a task
+    def get(self, request, project_pk, task_pk):
+        try:
+            task = Task.objects.get(pk=task_pk, project_id=project_pk)
+        except Task.DoesNotExist:
+            return Response({"error": "Công việc không tồn tại trong dự án này."}, status=status.HTTP_404_NOT_FOUND)
+        attachments = Attachment.objects.filter(task=task)
+        serializer = AttachmentSerializer(attachments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
+    # Create a new attachment for a task
+    def post(self, request, project_pk, task_pk):
+        try:
+            task = Task.objects.get(pk=task_pk, project_id=project_pk)
+        except Task.DoesNotExist:
+            return Response({"error": "Công việc không tồn tại trong dự án này."}, status=status.HTTP_404_NOT_FOUND)
+        attachment = AttachmentSerializer(data=request.data)
+        if attachment.is_valid():
+            attachment.save(uploader=request.user, task=task)
+            return Response(attachment.data, status=status.HTTP_201_CREATED)
+        return Response(attachment.errors, status=status.HTTP_400_BAD_REQUEST)           
+    
+
+class AttachmentDetailView(APIView):
+    # Get attachment details
+    def get(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error":"file đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = AttachmentSerializer(attachment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # Update the entire attachment
+    def put(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error":"file đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = AttachmentSerializer(attachment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Update a part of the attachment
     
