@@ -236,6 +236,75 @@ class CommentListView(APIView):
         return Response(comment.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# COMMENT DETAIL VIEW (chi tiết bình luận)
+class CommentDetailView(APIView):
+    def get(self, request, project_pk, task_pk, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Comment.DoesNotExist:
+            return Response({"error": "Bình luận không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, project_pk, task_pk, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Comment.DoesNotExist:
+            return Response({"error": "Bình luận không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            # Ghi log hoạt động (nếu có hàm create_activity_log)
+            try:
+                create_activity_log(
+                    user=request.user,
+                    action_description=f"Cập nhật bình luận: {comment.id}",
+                    project=comment.task.project,
+                    task=comment.task
+                )
+            except Exception:
+                pass
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, project_pk, task_pk, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Comment.DoesNotExist:
+            return Response({"error": "Bình luận không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CommentSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                create_activity_log(
+                    user=request.user,
+                    action_description=f"Sửa một phần bình luận: {comment.id}",
+                    project=comment.task.project,
+                    task=comment.task
+                )
+            except Exception:
+                pass
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, project_pk, task_pk, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Comment.DoesNotExist:
+            return Response({"error": "Bình luận không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            create_activity_log(
+                user=request.user,
+                action_description=f"Xóa bình luận: {comment.id}",
+                project=comment.task.project,
+                task=comment.task
+            )
+        except Exception:
+            pass
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 # ATTACHMENT LIST / CREATE VIEW (danh sách/tạo tập tin đính kèm)
 class AttachmentListView(APIView):
     def get(self, request, project_pk, task_pk):
@@ -263,6 +332,74 @@ class AttachmentListView(APIView):
             )
             return Response(attachment.data, status=status.HTTP_201_CREATED)
         return Response(attachment.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ATTACHMENT DETAIL VIEW (chi tiết tệp đính kèm)
+class AttachmentDetailView(APIView):
+    def get(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error": "File đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = AttachmentSerializer(attachment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error": "File đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = AttachmentSerializer(attachment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                create_activity_log(
+                    user=request.user,
+                    action_description=f"Cập nhật file đính kèm: {attachment.id}",
+                    project=attachment.task.project,
+                    task=attachment.task
+                )
+            except Exception:
+                pass
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error": "File đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = AttachmentSerializer(attachment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                create_activity_log(
+                    user=request.user,
+                    action_description=f"Sửa một phần file đính kèm: {attachment.id}",
+                    project=attachment.task.project,
+                    task=attachment.task
+                )
+            except Exception:
+                pass
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, project_pk, task_pk, pk):
+        try:
+            attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
+        except Attachment.DoesNotExist:
+            return Response({"error": "File đính kèm không tồn tại trong công việc này."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            create_activity_log(
+                user=request.user,
+                action_description=f"Xóa file đính kèm: {attachment.id}",
+                project=attachment.task.project,
+                task=attachment.task
+            )
+        except Exception:
+            pass
+        attachment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # ACTIVITY LOG VIEW (xem nhật ký hoạt động cho dự án cụ thể)
