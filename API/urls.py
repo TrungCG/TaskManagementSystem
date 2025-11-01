@@ -1,9 +1,14 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    # Người dùng
+    # Xác thực người dùng (Authentication)
     path('signup/', views.SignupView.as_view(), name='signup'),
+    path('login/', views.LoginView.as_view(), name='login'), # Đăng nhập JWT         
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Làm mới token
+
+    # Người dùng (Users)
     path('users/<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
 
     # Dự án (Projects)

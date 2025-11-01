@@ -3,6 +3,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 from .models import User, Project, Task, Comment, Attachment, ActivityLog
 from .serializers import (
@@ -24,6 +28,7 @@ def create_activity_log(user, action_description, project=None, task=None):
 
 # SIGNUP (đăng ký người dùng)
 class SignupView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         user = SignupSerializer(data=request.data)
         if user.is_valid():
@@ -31,6 +36,16 @@ class SignupView(APIView):
             return Response(user.data, status=status.HTTP_201_CREATED)
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# --- Đăng nhập JWT ---
+class LoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+
+
+# --- Làm mới token ---
+class RefreshTokenView(TokenRefreshView):
+    permission_classes = [AllowAny]
+    
 
 # USER DETAIL VIEW (hiển thị chi tiết người dùng)
 class UserDetailView(APIView):
@@ -45,6 +60,7 @@ class UserDetailView(APIView):
  
 # PROJECT LIST / CREATE VIEW (danh sách/tạo dự án)
 class ProjectListView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         projects = Project.objects.all()
         serializer = ProjectSerializer(projects, many=True)
@@ -65,6 +81,7 @@ class ProjectListView(APIView):
 
 # PROJECT DETAIL VIEW (chi tiết dự án)
 class ProjectDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
@@ -121,6 +138,7 @@ class ProjectDetailView(APIView):
 
 # TASK LIST / CREATE VIEW (danh sách/tạo công việc)
 class TaskListView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
@@ -150,6 +168,7 @@ class TaskListView(APIView):
 
 # TASK DETAIL VIEW (chi tiết công việc)
 class TaskDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, pk):
         try:
             task = Task.objects.get(pk=pk, project_id=project_pk)
@@ -209,6 +228,7 @@ class TaskDetailView(APIView):
 
 # COMMENT LIST / CREATE VIEW (danh sách/tạo bình luận)
 class CommentListView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, task_pk):
         try:
             task = Task.objects.get(pk=task_pk, project_id=project_pk)
@@ -238,6 +258,7 @@ class CommentListView(APIView):
 
 # COMMENT DETAIL VIEW (chi tiết bình luận)
 class CommentDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, task_pk, pk):
         try:
             comment = Comment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
@@ -307,6 +328,7 @@ class CommentDetailView(APIView):
 
 # ATTACHMENT LIST / CREATE VIEW (danh sách/tạo tập tin đính kèm)
 class AttachmentListView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, task_pk):
         try:
             task = Task.objects.get(pk=task_pk, project_id=project_pk)
@@ -336,6 +358,7 @@ class AttachmentListView(APIView):
 
 # ATTACHMENT DETAIL VIEW (chi tiết tệp đính kèm)
 class AttachmentDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, task_pk, pk):
         try:
             attachment = Attachment.objects.get(pk=pk, task__pk=task_pk, task__project_id=project_pk)
@@ -404,6 +427,7 @@ class AttachmentDetailView(APIView):
 
 # ACTIVITY LOG VIEW (xem nhật ký hoạt động cho dự án cụ thể)
 class ActivityLogProjectView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk):
         try:
             project = Project.objects.get(pk=project_pk)
@@ -416,6 +440,7 @@ class ActivityLogProjectView(APIView):
 
 # ACTIVITY LOG VIEW (xem nhật ký hoạt động cho công việc cụ thể)
 class ActivityLogTaskView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, project_pk, task_pk):
         try:
             task = Task.objects.get(pk=task_pk, project_id=project_pk)

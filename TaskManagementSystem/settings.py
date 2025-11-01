@@ -29,7 +29,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,7 +38,27 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'API',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # access token sống 30 phút
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # refresh token sống 7 ngày
+    "ROTATE_REFRESH_TOKENS": True,                    # cấp token mới khi refresh
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
 
 # Khai báo model User tùy chỉnh
 AUTH_USER_MODEL = 'API.User'

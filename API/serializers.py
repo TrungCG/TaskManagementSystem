@@ -3,6 +3,8 @@ from .models import User, Project, Task, Comment, Attachment, ActivityLog
 from rest_framework.validators import UniqueValidator
 
 class SignupSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
     email = serializers.EmailField(
         required=True, 
         validators=[UniqueValidator(queryset=User.objects.all(), message="Email đã được sử dụng.")]
@@ -12,7 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'confirm_password')
+        fields = ('id', 'username', 'email', 'password', 'confirm_password', 'first_name', 'last_name')
         extra_kwargs = {'username': {'required': True}}
 
     def validate(self, data):
@@ -22,9 +24,13 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data): 
         validated_data.pop('confirm_password') 
-        user = User.objects.create_user( username=validated_data['username'], 
-                                        email=validated_data['email'], 
-                                        password=validated_data['password'] ) 
+        user = User.objects.create_user( 
+            username=validated_data['username'], 
+            email=validated_data['email'], 
+            password=validated_data['password'], 
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+            ) 
         return user
 
 class UserSerializer(serializers.ModelSerializer):
