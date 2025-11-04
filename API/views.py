@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import PermissionDenied
 
 from .models import User, Project, Task, Comment, Attachment, ActivityLog
 from .serializers import (
@@ -19,6 +20,7 @@ from .permissions import (
     CanViewCommentOrAttachmentList,
     IsCommentOrAttachmentOwner,
     CanViewActivityLog,
+    IsProjectOwnerOnly,
 )
 from API import serializers
 
@@ -143,6 +145,62 @@ class ProjectDetailView(APIView):
             f"đã xóa dự án '{project_name}'"
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#  ADD MEMBER VIEW (thêm thành viên vào dự án)
+class AddMemberView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectOwnerOnly]
+    def post(self, request, pk):
+        try:
+            project = Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            raise NotFound("Dự án không tồn tại.")
+        self.check_object_permissions(request, project)# Kiểm tra quyền của chủ dự án
+        user_id = request.data.get("user_id")# 
+        if not user_id:
+            return Response({"error": "Thiếu user_id trong dữ liệu gửi lên."}, status=status.HTTP_400_BAD_REQUEST)        
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Người dùng không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
+        
+        if user in project.members.all():
+            return Response({"message": f"{user.username} đã là thành viên của dự án."}, status=status.HTTP_200_OK)
+              
+        project.members.add(user)
+        create_activity_log(request.user, f"Thêm thành viên '{user.username}' vào dự án '{project.name}'", project=project)
+        return Response({"message": f"Đã thêm {user.username} vào dự án."}, status=status.HTTP_200_OK)
+
+
+# REMOVE MEMBER VIEW (xóa thành viên khỏi dự án)
+class RemoveMemberView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectOwnerOnly]
+
+    def post(self, request, pk):
+        try:
+            project = Project.objects.get(pk=pk)
+        except Project.DoesNotExist:
+            raise NotFound("Dự án không tồn tại.")
+        
+        self.check_object_permissions(request, project)
+
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"error": "Thiếu user_id trong dữ liệu gửi lên."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Người dùng không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
+
+        if user == project.owner:
+            return Response({"error": "Không thể xóa chủ dự án."}, status=status.HTTP_400_BAD_REQUEST)
+        if user not in project.members.all():
+            return Response({"message": f"{user.username} không phải là thành viên của dự án."}, status=status.HTTP_200_OK)
+
+        project.members.remove(user)
+        create_activity_log(request.user, f"Xóa thành viên '{user.username}' khỏi dự án '{project.name}'", project=project)
+        return Response({"message": f"Đã xóa {user.username} khỏi dự án."}, status=status.HTTP_200_OK)
 
 
 # TASK LIST / CREATE VIEW (danh sách/tạo công việc)

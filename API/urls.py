@@ -15,6 +15,10 @@ urlpatterns = [
     path('projects/', views.ProjectListView.as_view(), name='project-list'),
     path('projects/<int:pk>/', views.ProjectDetailView.as_view(), name='project-detail'),
 
+    # Quản lý thành viên dự án
+    path('projects/<int:pk>/add_member/', views.AddMemberView.as_view(), name='project-add-member'),
+    path('projects/<int:pk>/remove_member/', views.RemoveMemberView.as_view(), name='project-remove-member'),
+
     # Công việc (Tasks)
     path('projects/<int:pk>/tasks/', views.TaskListView.as_view(), name='task-list'),
     path('projects/<int:project_pk>/tasks/<int:pk>/', views.TaskDetailView.as_view(), name='task-detail'),
