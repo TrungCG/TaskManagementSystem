@@ -6,10 +6,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import User, Project, Task, Comment, Attachment, ActivityLog
 from .serializers import (
-    SignupSerializer, UserSerializer, ProjectSerializer,
+    SignupSerializer, UserSerializer, ProjectSerializer, UserBasicSerializer,
     TaskSerializer, CommentSerializer, AttachmentSerializer, ActivityLogSerializer
 )
 from .permissions import (
@@ -22,7 +23,7 @@ from .permissions import (
     CanViewActivityLog,
     IsProjectOwnerOnly,
 )
-from API import serializers
+from .filters import TaskFilter, ProjectFilter, UserFilter
 
 
 # Hàm tiện ích để tạo bản ghi nhật ký hoạt động
@@ -51,6 +52,20 @@ class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
 
+# USER LIST VIEW (danh sách người dùng)
+class UserListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = User.objects.all().only('id', 'username', 'first_name', 'last_name', 'email')
+        filterset = UserFilter(request.GET, queryset=queryset, request=request)
+        if filterset.is_valid():
+            queryset = filterset.qs
+
+        serializer = UserBasicSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 # USER DETAIL VIEW (hiển thị chi tiết người dùng)
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -68,6 +83,11 @@ class ProjectListView(APIView):
     permission_classes = [IsAuthenticated, CanViewProjectList]
     def get(self, request):
         project = self.permission_classes[1]().filter_queryset(request)
+        
+        filterset = ProjectFilter(request.GET, queryset=project, request=request)
+        if filterset.is_valid():
+            project = filterset.qs
+            
         serializer = ProjectSerializer(project, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -208,6 +228,11 @@ class TaskListView(APIView):
     permission_classes = [IsAuthenticated, CanViewTaskList]
     def get(self, request, pk):
         task = self.permission_classes[1]().filter_queryset(request, pk)
+
+        filterset = TaskFilter(request.GET, queryset=task, request=request)
+        if filterset.is_valid():
+            task = filterset.qs
+
         serializer = TaskSerializer(task, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
