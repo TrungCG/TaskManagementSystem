@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
@@ -50,6 +51,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 from datetime import timedelta
@@ -64,6 +66,20 @@ SIMPLE_JWT = {
 
 # Khai báo model User tùy chỉnh
 AUTH_USER_MODEL = 'API.User'
+
+
+# Cấu hình drf-spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Task Management System API',
+    'DESCRIPTION': 'Tài liệu API chi tiết cho Hệ thống Quản lý Công việc.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Cấu hình để Swagger UI hiểu JWT
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
