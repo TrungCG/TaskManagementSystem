@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import render
 
 from .models import User, Project, Task, Comment, Attachment, ActivityLog
 from .serializers import (
@@ -254,7 +255,6 @@ class TaskListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 # TASK DETAIL VIEW (chi tiết công việc)
 class TaskDetailView(APIView):
     permission_classes = [IsAuthenticated, IsTaskPermission]
@@ -493,6 +493,7 @@ class ActivityLogProjectView(APIView):
         return Response(ActivityLogSerializer(logs, many=True).data)
 
 
+# ACTIVITY LOG VIEW (xem nhật ký hoạt động cho công việc cụ thể)
 class ActivityLogTaskView(APIView):
     permission_classes = [IsAuthenticated, CanViewActivityLog]
     def get(self, request, project_pk, task_pk):
@@ -503,3 +504,11 @@ class ActivityLogTaskView(APIView):
         
         logs = ActivityLog.objects.filter(task=task).order_by('-timestamp')
         return Response(ActivityLogSerializer(logs, many=True).data)
+    
+
+
+
+# HOMEPAGE VIEW (trang chủ)
+def task_page(request):
+    return render(request, "API/index.html")    
+    

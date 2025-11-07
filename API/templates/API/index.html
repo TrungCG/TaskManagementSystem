@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asana Clone</title>
+    <link rel="stylesheet" href="{% static 'API/css/style.css' %}">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="top-bar">
+        <div class="top-bar-left">
+            <button class="hamburger-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" fill="currentColor"></path></svg>
+            </button>
+            <div class="create-btn-wrapper">
+                <button class="create-button">
+                    <svg class="create-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"></path></svg>
+                    Create
+                </button>
+            </div>
+        </div>
+        <div class="top-bar-center">
+            <div class="search-bar">
+                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+                <input type="text" placeholder="Search student.humg.edu.vn">
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <div class="profile-avatar-wrapper" id="profile-wrapper">
+                <div class="profile-avatar" id="user-avatar">?</div>
+                <svg class="chevron-down" viewBox="0 0 24 24" width="16" height="16"><path d="m7 10 5 5 5-5H7z" fill="currentColor"></path></svg>
+                <!-- Dropdown Logout -->
+                <div class="profile-dropdown hidden" id="logout-dropdown">
+                    <button id="logout-button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="active"><svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" /></svg>Home</a></li>
+                    <li><a href="#"><svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,22a.5.5,0,0,1-.5-.5v-3H4a2,2,0,0,1-2-2V4A2,2,0,0,1,4,2h16a2,2,0,0,1,2,2v12a2,2,0,0,1-2,2H14.5a.5.5,0,0,1-.5-.5H9.5M4,4v12h16V4H4m5.5,17h4v-3h-4v3Z" /></svg>My tasks</a></li>
+                    <li><a href="#"><svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2,0,0,0,4,20H20A2,2,0,0,0,22,18V6C22,4.89,21.1,4,20,4Z" /></svg>Inbox</a></li>
+                </ul>
+                <div class="nav-section"><div class="nav-section-header"><span>Starred</span></div><ul><li><a href="#"><span class="project-dot starred"></span>Cross-functional project p...</a></li></ul></div>
+                <div class="nav-section"><div class="nav-section-header"><span>Projects</span><button class="plus-btn">+</button></div><ul id="project-list-sidebar"></ul></div>
+            </nav>
+        </aside>
+        <main class="dashboard">
+            <div class="dashboard-header"><div class="greeting"><p id="current-date"></p><h1>Good evening, <span id="user-name"></span></h1></div></div>
+            <div class="task-container"><div class="task-container-header"><div class="task-title"><div class="avatar" id="my-tasks-avatar">?</div><h2>My tasks</h2><svg class="lock-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"></path></svg></div><button class="more-btn">...</button></div><div class="task-tabs"><button class="tab-item active" data-filter="upcoming">Upcoming</button><button class="tab-item" data-filter="overdue">Overdue</button><button class="tab-item" data-filter="completed">Completed</button></div><div class="create-task-wrapper"><button class="create-task-button">+ Create task</button></div><ul class="task-list" id="task-list-container"></ul></div>
+        </main>
+    </div>
+
+    <!-- Modal Đăng nhập / Đăng ký -->
+    <div class="auth-modal-overlay hidden" id="auth-modal">
+        <div class="auth-modal-content">
+            <!-- Login Form -->
+            <form id="login-form">
+                <h2 class="auth-title">Welcome Back!</h2>
+                <p class="auth-subtitle">Log in to continue to your workspace.</p>
+                <p class="auth-error" id="login-error"></p>
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" required placeholder="e.g., yourusername">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="auth-button">Log In</button>
+                <p class="switch-form-text">Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="hidden">
+                <h2 class="auth-title">Create Your Account</h2>
+                <p class="auth-subtitle">Get started with a new workspace in minutes.</p>
+                <p class="auth-error" id="signup-error"></p>
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" name="username" required placeholder="e.g., newuser">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="signup-firstname">First Name</label>
+                        <input type="text" id="signup-firstname" name="first_name" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-lastname">Last Name</label>
+                        <input type="text" id="signup-lastname" name="last_name" required placeholder="Doe">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" required placeholder="Min. 8 characters">
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" name="confirm_password" required placeholder="Re-enter password">
+                </div>
+                <button type="submit" class="auth-button">Create Account</button>
+                <p class="switch-form-text">Already have an account? <a href="#" id="show-login">Log In</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="toast hidden">
+        <div class="toast-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <p class="toast-message">Account created successfully!</p>
+    </div>
+
+    <script src="{% static 'API/js/api.js' %}"></script>
+    <script src="{% static 'API/js/main.js' %}"></script>
+</body>
+</html>

@@ -3,6 +3,8 @@ from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
+    path('', views.task_page, name='frontend'),
+    
     # Xác thực người dùng (Authentication)
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('login/', views.LoginView.as_view(), name='login'), # Đăng nhập JWT         
