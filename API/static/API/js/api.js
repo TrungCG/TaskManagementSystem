@@ -104,3 +104,9 @@ async function fetchAllMyTasks(projects) {
     const taskPromises = projects.map(p => apiFetch(`/projects/${p.id}/tasks/?assignee=me`));
     return (await Promise.all(taskPromises)).flat();
 }
+
+// --- HÀM MỚI ---
+// Lấy tất cả công việc cho một dự án cụ thể
+async function fetchTasksForProject(projectId) {
+    return apiFetch(`/projects/${projectId}/tasks/`);
+}
