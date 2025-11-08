@@ -129,6 +129,7 @@ Tại đây, bạn có thể xem danh sách tất cả các API endpoint, chi ti
 *   **`POST /projects/`**: Tạo một dự án mới.
 *   **`GET /projects/{id}/`**: Lấy chi tiết một dự án.
 *   **`PUT /projects/{id}/`**: Cập nhật dự án.
+*   **`PATCH /projects/{id}/`**: Cập nhật một phần dự án.
 *   **`DELETE /projects/{id}/`**: Xóa một dự án.
 *   **`POST /projects/{id}/add_member/`**: Thêm thành viên vào dự án.
 *   **`POST /projects/{id}/remove_member/`**: Xóa thành viên khỏi dự án.
@@ -138,17 +139,21 @@ Tại đây, bạn có thể xem danh sách tất cả các API endpoint, chi ti
 *   **`POST /projects/{project_pk}/tasks/`**: Tạo công việc mới trong dự án.
 *   **`GET /tasks/{id}/`**: Lấy chi tiết một công việc.
 *   **`PUT /tasks/{id}/`**: Cập nhật công việc.
+*   **`PATCH /tasks/{id}/`**: Cập nhật một phần công việc.
 *   **`DELETE /tasks/{id}/`**: Xóa công việc.
 
 #### 4. Comments & Attachments
 *   **`GET /tasks/{task_pk}/comments/`**: Lấy danh sách bình luận của một công việc.
 *   **`POST /tasks/{task_pk}/comments/`**: Thêm bình luận mới.
+*   **`PUT /tasks/{task_pk}/comments/`**: Cập nhật bình luận.
+*   **`PATCH /tasks/{task_pk}/comments/`**: Cập nhật một phần bình luận.
 *   **`DELETE /comments/{id}/`**: Xóa bình luận.
 *   **`POST /tasks/{task_pk}/attachments/`**: Tải lên một tệp đính kèm mới.
 *   **`DELETE /attachments/{id}/`**: Xóa một tệp đính kèm.
 
 #### 5. Activity Log
 *   **`GET /projects/{project_pk}/activities/`**: Lấy lịch sử hoạt động của một dự án.
+*   **`GET /projects/{project_pk}/tasks/activities/`**: Lấy lịch sử hoạt động của một task của dự án.
 
 </details>
 
@@ -164,8 +169,8 @@ Tại đây, bạn có thể xem danh sách tất cả các API endpoint, chi ti
 
 **2. Clone repository:**
 ```bash
-git clone [URL_REPOSITORY_CUA_BAN]
-cd [TEN_THU_MUC_DU_AN]
+git clone https://github.com/TrungCG/TaskManagementSystem.git
+cd TaskManagementSystem
 ```
 
 **3. Tạo và kích hoạt môi trường ảo (Virtual Environment):**
