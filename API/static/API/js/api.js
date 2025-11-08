@@ -15,7 +15,7 @@ function setTokens(access, refresh) {
 function logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    window.location.reload(); // Tải lại trang, JS sẽ tự động hiển thị form login
+    window.location.reload();
 }
 
 async function apiFetch(endpoint, options = {}) {
@@ -72,7 +72,7 @@ async function login(username, password) {
     }
     const data = await response.json();
     setTokens(data.access, data.refresh);
-    window.location.reload(); // Tải lại trang, JS sẽ tự động hiển thị app
+    window.location.reload();
 }
 
 async function signup(userData) {
@@ -99,14 +99,52 @@ async function fetchProjects() {
     return apiFetch('/projects/');
 }
 
+async function createProject(projectData) {
+    return apiFetch('/projects/', {
+        method: 'POST',
+        body: JSON.stringify(projectData)
+    });
+}
+
 async function fetchAllMyTasks(projects) {
     if (!projects || projects.length === 0) return [];
     const taskPromises = projects.map(p => apiFetch(`/projects/${p.id}/tasks/?assignee=me`));
     return (await Promise.all(taskPromises)).flat();
 }
 
-// --- HÀM MỚI ---
-// Lấy tất cả công việc cho một dự án cụ thể
 async function fetchTasksForProject(projectId) {
     return apiFetch(`/projects/${projectId}/tasks/`);
+}
+
+async function addMemberToProject(projectId, userId) {
+    return apiFetch(`/projects/${projectId}/add_member/`, {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId })
+    });
+}
+
+async function removeMemberFromProject(projectId, userId) {
+    return apiFetch(`/projects/${projectId}/remove_member/`, {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId })
+    });
+}
+
+async function searchUsers(query) {
+    return apiFetch(`/users/?search=${query}`);
+}
+
+async function fetchTaskDetails(projectId, taskId) {
+    return apiFetch(`/projects/${projectId}/tasks/${taskId}/`);
+}
+
+async function fetchCommentsForTask(projectId, taskId) {
+    return apiFetch(`/projects/${projectId}/tasks/${taskId}/comments/`);
+}
+
+async function postComment(projectId, taskId, commentBody) {
+    return apiFetch(`/projects/${projectId}/tasks/${taskId}/comments/`, {
+        method: 'POST',
+        body: JSON.stringify({ body: commentBody })
+    });
 }
