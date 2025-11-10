@@ -3,7 +3,7 @@ from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    path('', views.task_page, name='frontend'),
+    # path('', views.task_page, name='frontend'),
     
     # Xác thực người dùng (Authentication)
     path('signup/', views.SignupView.as_view(), name='signup'),

@@ -508,7 +508,7 @@ class ActivityLogTaskView(APIView):
 
 
 
-# HOMEPAGE VIEW (trang chủ)
-def task_page(request):
-    return render(request, "API/index.html")    
+# # HOMEPAGE VIEW (trang chủ)
+# def task_page(request):
+#     return render(request, "API/index.html")    
     
